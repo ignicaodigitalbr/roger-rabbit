@@ -1,0 +1,46 @@
+{
+  "name": "roger-rabbit",
+  "version": "1.0.0",
+  "description": "amqplib wrapper",
+  "main": "index.js",
+  "scripts": {
+    "test": "NODE_ENV=test jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ignicaodigitalbr/roger-rabbit.git"
+  },
+  "keywords": [
+    "amqp",
+    "broker",
+    "rabbitmq"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ignicaodigitalbr/roger-rabbit/issues"
+  },
+  "homepage": "https://github.com/ignicaodigitalbr/roger-rabbit#readme",
+  "dependencies": {
+    "amqplib": "^0.5.2",
+    "lodash": "^4.17.10"
+  },
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^13.0.0",
+    "eslint-plugin-import": "^2.13.0",
+    "jest": "^23.2.0"
+  },
+  "jest": {
+    "timers": "fake",
+    "collectCoverage": true,
+    "coverageDirectory": "<rootDir>/coverage",
+    "testPathIgnorePatterns": [
+      "<rootDir>/node_modules/"
+    ],
+    "coverageReporters": [
+      "json",
+      "lcov"
+    ]
+  }
+}
