@@ -1,3 +1,5 @@
+[![Travis](https://img.shields.io/travis/ignicaodigitalbr/roget-rabbit.svg?style=flat-square)](https://travis-ci.org/ignicaodigitalbr/roget-rabbit/builds)
+
 # Roger Rabbit
 
 Roger Rabbit is a module that makes the process of consuming and publishing messages in message brokers easier.
