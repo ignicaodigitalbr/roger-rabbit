@@ -4,7 +4,9 @@
   "description": "amqplib wrapper",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test jest"
+    "test": "npm run lint && npm run unit",
+    "unit": "NODE_ENV=test jest",
+    "lint": "eslint src"
   },
   "repository": {
     "type": "git",
