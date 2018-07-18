@@ -1,4 +1,4 @@
-[![Travis](https://img.shields.io/travis/ignicaodigitalbr/roget-rabbit.svg?style=flat-square)](https://travis-ci.org/ignicaodigitalbr/roget-rabbit/builds)
+[![Travis](https://img.shields.io/travis/ignicaodigitalbr/roger-rabbit.svg?style=flat-square)](https://travis-ci.org/ignicaodigitalbr/roget-rabbit/builds)
 
 # Roger Rabbit
 
