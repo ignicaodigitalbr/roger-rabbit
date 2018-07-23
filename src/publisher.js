@@ -7,12 +7,5 @@ module.exports = baseOptions => (queueName, message, publisherOptions) => {
   const context = 'publisher';
   const options = defaultsDeep({}, baseOptions, { context, message, queue }, publisherOptions);
 
-  const publish = channel => queueModule.sendToQueue(options, channel)
-    .catch((error) => {
-      channel.connection.close();
-
-      return error;
-    });
-
-  return connection.connect(options, publish);
+  return connection.connect(options, channel => queueModule.sendToQueue(options, channel));
 };

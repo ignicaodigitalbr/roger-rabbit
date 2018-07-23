@@ -6,6 +6,8 @@ Module.sendToQueue = (options, channel) => new Promise((resolve, reject) => {
   const { queue, message } = options;
 
   return channel.sendToQueue(queue.name, helpers.jsonToBuffer(message), {}, (error) => {
+    channel.connection.close();
+
     if (error) {
       helpers.log('error', error.message, options);
 
@@ -13,8 +15,6 @@ Module.sendToQueue = (options, channel) => new Promise((resolve, reject) => {
     }
 
     helpers.log('info', 'message is published', options);
-
-    channel.connection.close();
 
     return resolve({ queue: queue.name, message });
   });

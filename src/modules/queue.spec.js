@@ -47,12 +47,12 @@ describe('modules/queue', () => {
         });
       });
 
-      test('log that the message was published', () => {
-        expect(helpers.log).toHaveBeenCalledWith('info', 'message is published', options);
-      });
-
       test('close channel connection', () => {
         expect(channel.connection.close).toHaveBeenCalled();
+      });
+
+      test('log that the message was published', () => {
+        expect(helpers.log).toHaveBeenCalledWith('info', 'message is published', options);
       });
 
       test('return the queue name', () => {
@@ -75,6 +75,10 @@ describe('modules/queue', () => {
 
           done();
         });
+      });
+
+      test('close channel connection', () => {
+        expect(channel.connection.close).toHaveBeenCalled();
       });
 
       test('log that the message was not published', () => {
