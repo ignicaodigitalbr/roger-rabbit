@@ -1,4 +1,4 @@
-[![Travis](https://img.shields.io/travis/ignicaodigitalbr/roger-rabbit.svg?style=flat-square)](https://travis-ci.org/ignicaodigitalbr/roget-rabbit/builds)
+[![Travis](https://img.shields.io/travis/ignicaodigitalbr/roger-rabbit.svg?style=flat-square)](https://travis-ci.org/ignicaodigitalbr/roger-rabbit/builds)
 [![Codecov](https://img.shields.io/codecov/c/github/ignicaodigitalbr/roger-rabbit.svg?style=flat-square)](https://codecov.io/gh/ignicaodigitalbr/roger-rabbit/)
 [![npm](https://img.shields.io/npm/v/roger-rabbit.svg?style=flat-square)](https://www.npmjs.com/package/roger-rabbit)
 [![npm](https://img.shields.io/npm/dt/roger-rabbit.svg?style=flat-square)](https://www.npmjs.com/package/roger-rabbit)
