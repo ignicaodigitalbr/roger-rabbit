@@ -5,11 +5,15 @@
 
 # Roger Rabbit
 
-Roger Rabbit is a module that makes the process of consuming and publishing messages in message brokers easier.
+Roger Rabbit is a module that makes the process of consuming and publishing messages in message brokers easier. It is a wrapper for [amqplib](https://www.squaremobius.net/amqp.node/).
 
-## Usage
+## Install
 
-Roger Rabbit is a wrapper for [amqplib](https://www.squaremobius.net/amqp.node/). For exchange and queue options read [amqplib documentation](https://www.squaremobius.net/amqp.node/channel_api.html).
+```shell
+npm install roger-rabbit --save
+```
+
+## Example
 
 ```javascript
 // broker.js
@@ -22,7 +26,9 @@ module.exports = Broker({
     name: 'exchange',
   },
 });
+```
 
+```javascript
 // consumer.js
 const broker = require('./broker');
 
@@ -34,9 +40,68 @@ broker.consume({ queue }).then({ message, ack, reject } => {
   // do something with message
   ack();
 });
+```
 
+```javascript
 // publisher.js
 const broker = require('./broker');
 
 broker.publish('queue.name', { message: 'hello world' });
+```
+
+## Documentation
+
+### Broker
+
+| Option     | Description                           | Required  | Default |
+| -----------|---------------------------------------|-----------|---------|
+| host       | message broker connection url         | yes       | null    |
+| logger     | logger object                         | no        | console |
+| disableLog | disable log (all levels)              | no        | false   |
+| exchange   | [exchange options](#exchange-options) | no        | null    |
+| queue      | [queue options](#queue-options)       | no        | null    |
+
+
+### Exchange options
+
+| Option  | Description                                                                                                     | Default                 |
+| --------|-----------------------------------------------------------------------------------------------------------------|-------------------------|
+| type    | direct, topic, fanout                                                                                           | empty string (deafault) |
+| name    | exchange name                                                                                                   | null                    |
+| options | options used in [assertExchange](http://www.squaremobius.net/amqp.node/channel_api.html#channel_assertExchange) | null                    |
+
+### Queue options
+
+| Option  | Description                                                                                               | Default |
+| --------|-----------------------------------------------------------------------------------------------------------|---------|
+| name    | queue name                                                                                                | null    |
+| options | options used in [assertQueue](http://www.squaremobius.net/amqp.node/channel_api.html#channel_assertQueue) | null    |
+
+### broker.consume
+
+`broker.consume` expects to receive [broker options](#broker). Example:
+
+```javascript
+const queue = {
+  name: 'queue.name',
+  options: {},
+};
+
+broker.consume({ queue })
+  .then(({ ack, reject, message }) => /* handle success */)
+  .catch(error => /* handle error */);
+```
+
+### broker.publish
+
+`broker.publish` expects to receive queue name, message and [broker options](#broker). Example:
+
+```javascript
+const queue = {
+  options: {},
+};
+
+broker.publish('queue.name', { message: 'message' }, { queue })
+  .then(({ queue, message }) => /* handle success */)
+  .catch(error => /* handle error */);
 ```
