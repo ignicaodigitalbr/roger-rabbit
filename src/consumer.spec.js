@@ -58,6 +58,6 @@ describe('consumer', () => {
   });
 
   test('call channelConsumer', () => {
-    expect(channelModule.channelConsumer).toHaveBeenCalledWith(defaultsDeep({}, baseOptions, consumerOptions, { context: 'consumer' }), channel);
+    expect(channelModule.channelConsumer).toHaveBeenCalledWith(defaultsDeep({}, baseOptions, consumerOptions, { context: 'consumer' }), expect.any(Object));
   });
 });
