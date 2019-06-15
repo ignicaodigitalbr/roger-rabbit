@@ -3,40 +3,42 @@ const { connect } = require('./connection');
 const helpers = require('./helpers');
 
 describe('modules/connection', () => {
+  let host;
+
+  beforeEach(() => {
+    host = `host-${Math.floor(Math.random() * (100000))}`;
+  });
+
   describe('connect', () => {
     describe('when connection is created', () => {
-      let onCreateChannel;
       let connection;
       let options;
 
-      beforeEach(() => {
-        onCreateChannel = jest.fn();
-
+      beforeEach((done) => {
         connection = {
           createConfirmChannel: () => {},
         };
 
         options = {
-          host: 'host',
+          context: 'context',
           logger: console,
+          host,
         };
 
         jest.spyOn(amqp, 'connect').mockImplementation(() => new Promise(resolve => resolve(connection)));
         jest.spyOn(connection, 'createConfirmChannel').mockImplementation(() => new Promise(resolve => resolve({ channel: true })));
 
-        connect(options, onCreateChannel);
+        connect(options).then(() => {
+          done();
+        });
       });
 
       test('call amqp.connect with host', () => {
-        expect(amqp.connect).toHaveBeenCalledWith('host');
+        expect(amqp.connect).toHaveBeenCalledWith(host);
       });
 
       test('call connection.createConfirmChannel', () => {
         expect(connection.createConfirmChannel).toHaveBeenCalled();
-      });
-
-      test('call onCreateChannel with channel created', () => {
-        expect(onCreateChannel).toHaveBeenCalledWith({ channel: true });
       });
     });
 
@@ -46,8 +48,8 @@ describe('modules/connection', () => {
 
       beforeEach(() => {
         options = {
-          host: 'host',
           logger: console,
+          host,
         };
 
         error = new Error('error message');

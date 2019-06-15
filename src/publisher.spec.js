@@ -1,39 +1,80 @@
-const { defaultsDeep } = require('lodash');
-const connection = require('./modules/connection');
-const queueModule = require('./modules/queue');
 const publisher = require('./publisher');
+const helpers = require('./modules/helpers');
 
 describe('publisher', () => {
-  describe('call sendToQueue', () => {
-    let publisherOptions;
-    let baseOptions;
-    let context;
-    let message;
-    let channel;
+  let publisherOptions;
+  let baseOptions;
+  let message;
+  let channel;
+  let connection;
 
-    beforeEach(() => {
-      baseOptions = { host: 'host' };
-      publisherOptions = { queue: { foo: true } };
-      context = 'publisher';
-      message = { message: true };
-      channel = {
-        connection: {
-          close: jest.fn(),
-        },
-      };
+  beforeEach(() => {
+    baseOptions = {
+      host: 'host',
+      disableLog: true,
+      exchange: {
+        name: 'exchange.name',
+      },
+    };
 
-      jest.spyOn(connection, 'connect').mockImplementation((options, callback) => callback(channel));
-      jest.spyOn(queueModule, 'sendToQueue').mockImplementation(() => new Promise(resolve => resolve()));
+    publisherOptions = {};
 
-      publisher(baseOptions)('queue.name', message, publisherOptions);
+    message = { message: true };
+
+    channel = {
+      connection: {
+        close: jest.fn(),
+      },
+    };
+
+    connection = new Promise(resolve => resolve(channel));
+  });
+
+  describe('when the message was published', () => {
+    beforeEach((done) => {
+      channel.publish = jest.fn().mockReturnValue(true);
+
+      jest.spyOn(helpers, 'log');
+
+      publisher(connection, baseOptions)('routing.key', message, publisherOptions)
+        .then(() => done());
     });
 
-    test('call connection.connect', () => {
-      expect(connection.connect).toHaveBeenCalledWith(defaultsDeep({}, baseOptions, { context, message, queue: { name: 'queue.name' } }, publisherOptions), expect.any(Function));
+    test('call channel.publish with correct params', () => {
+      expect(channel.publish).toHaveBeenCalledWith(
+        'exchange.name',
+        'routing.key',
+        helpers.jsonToBuffer(message),
+        publisherOptions,
+      );
     });
 
-    test('call sendToQueue', () => {
-      expect(queueModule.sendToQueue).toHaveBeenCalled();
+    test('call log info', () => {
+      expect(helpers.log).toHaveBeenCalledWith('info', 'message is published', expect.any(Object));
+    });
+  });
+
+  describe('when the message was not published', () => {
+    beforeEach((done) => {
+      channel.publish = jest.fn().mockReturnValue(false);
+
+      jest.spyOn(helpers, 'log');
+
+      publisher(connection, baseOptions)('routing.key', message, publisherOptions)
+        .catch(() => done());
+    });
+
+    test('call channel.publish with correct params', () => {
+      expect(channel.publish).toHaveBeenCalledWith(
+        'exchange.name',
+        'routing.key',
+        helpers.jsonToBuffer(message),
+        publisherOptions,
+      );
+    });
+
+    test('call log error', () => {
+      expect(helpers.log).toHaveBeenCalledWith('error', 'Message can not be published', expect.any(Object));
     });
   });
 });

@@ -2,29 +2,26 @@ const helpers = require('./helpers');
 
 const Module = {};
 
-Module.channelConsumer = (options, channel) => new Promise((resolve, rejectPromise) => {
+Module.consume = (options, channel, callback) => {
   const { queue } = options;
 
   return channel.consume(queue.name, (receivedMessage) => {
-    const reject = () => channel.reject(receivedMessage);
-    const ack = () => channel.ack(receivedMessage);
-
-    let message;
-
     try {
-      message = helpers.bufferToJson(receivedMessage.content);
+      const message = helpers.bufferToJson(receivedMessage.content);
+
+      callback(message);
+
+      channel.ack(receivedMessage);
+
+      helpers.log('info', 'message was consumed', Object.assign({}, options, { message }));
     } catch (error) {
       helpers.log('error', error.message, options);
 
-      reject();
-
-      return rejectPromise(error);
+      channel.reject(receivedMessage);
     }
 
-    helpers.log('info', 'message was consumed', Object.assign({}, options, { message }));
-
-    return resolve({ message, ack, reject });
+    return receivedMessage;
   });
-});
+};
 
 module.exports = Module;

@@ -1,22 +1,28 @@
 const { defaultsDeep } = require('lodash');
 const consumer = require('./consumer');
 const channelModule = require('./modules/channel');
-const connection = require('./modules/connection');
 
 describe('consumer', () => {
   let consumerOptions;
   let baseOptions;
   let channel;
+  let connection;
+  let callback;
 
-  beforeEach(() => {
-    const promiseMock = jest.fn();
+  beforeEach((done) => {
+    const assertExchange = jest.fn();
+    const assertQueue = jest.fn();
+    const bindQueue = jest.fn();
 
-    promiseMock.mockReturnValue(new Promise(resolve => resolve()));
+    assertExchange.mockReturnValue(new Promise(resolve => resolve()));
+    assertQueue.mockReturnValue(new Promise(resolve => resolve()));
+    bindQueue.mockReturnValue(new Promise(resolve => resolve()));
 
     channel = {
-      assertExchange: promiseMock,
-      assertQueue: promiseMock,
-      bindQueue: promiseMock,
+      assertExchange,
+      assertQueue,
+      bindQueue,
+      prefetch: jest.fn(),
     };
 
     consumerOptions = {
@@ -24,6 +30,7 @@ describe('consumer', () => {
         name: 'queue.name',
         options: {},
       },
+      routingKey: 'routing.key',
     };
 
     baseOptions = {
@@ -35,14 +42,13 @@ describe('consumer', () => {
       },
     };
 
-    jest.spyOn(connection, 'connect').mockImplementation((options, callback) => callback(channel));
-    jest.spyOn(channelModule, 'channelConsumer').mockImplementation(() => {});
+    connection = new Promise(resolve => resolve(channel));
 
-    consumer(baseOptions)(consumerOptions);
-  });
+    callback = jest.fn();
 
-  test('call connection.connect', () => {
-    expect(connection.connect).toHaveBeenCalledWith(defaultsDeep({}, baseOptions, consumerOptions, { context: 'consumer' }), expect.any(Function));
+    jest.spyOn(channelModule, 'consume').mockImplementation(() => {});
+
+    consumer(connection, baseOptions)(consumerOptions, callback).then(() => done());
   });
 
   test('call channel.assertExchange', () => {
@@ -53,11 +59,11 @@ describe('consumer', () => {
     expect(channel.assertQueue).toHaveBeenCalledWith('queue.name', {});
   });
 
-  test('call channel.assertQueue', () => {
-    expect(channel.bindQueue).toHaveBeenCalledWith('queue.name', 'exchange.name', 'queue.name');
+  test('call channel.bindQueue', () => {
+    expect(channel.bindQueue).toHaveBeenCalledWith('queue.name', 'exchange.name', 'routing.key');
   });
 
-  test('call channelConsumer', () => {
-    expect(channelModule.channelConsumer).toHaveBeenCalledWith(defaultsDeep({}, baseOptions, consumerOptions, { context: 'consumer' }), expect.any(Object));
+  test('call consume', () => {
+    expect(channelModule.consume).toHaveBeenCalledWith(defaultsDeep({}, baseOptions, consumerOptions, { context: 'consumer' }), expect.any(Object), callback);
   });
 });

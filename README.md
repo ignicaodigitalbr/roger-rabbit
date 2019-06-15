@@ -22,8 +22,8 @@ const Broker = require('roger-rabbit');
 module.exports = Broker({
   host: 'amqp://guest:guest@localhost:5672',
   exchange: {
-    type: 'topic',
-    name: 'exchange',
+    type: 'direct',
+    name: 'exchange.name',
   },
 });
 ```
@@ -34,11 +34,16 @@ const broker = require('./broker');
 
 const queue = {
   name: 'queue.name',
+  options: {
+    durable: true,
+  },
 };
 
-broker.consume({ queue }).then({ message, ack, reject } => {
-  // do something with message
-  ack();
+const routingKey = 'routing.key.name';
+
+broker.consume({ queue, routingKey }, (message) => {
+  // do something
+  // throw an error to reject message
 });
 ```
 
@@ -46,7 +51,10 @@ broker.consume({ queue }).then({ message, ack, reject } => {
 // publisher.js
 const broker = require('./broker');
 
-broker.publish('queue.name', { message: 'hello world' });
+broker
+  .publish('routing.key.name', { message: 'hello world' })
+  .then(console.log)
+  .catch(console.error);
 ```
 
 ## Documentation
@@ -79,29 +87,53 @@ broker.publish('queue.name', { message: 'hello world' });
 
 ### broker.consume
 
-`broker.consume` expects to receive [broker options](#broker). Example:
+`broker.consume` expects to receive an object with [consumers options](#queue-options) and routing key name and callback. Example:
 
 ```javascript
+const broker = require('./broker');
+
 const queue = {
   name: 'queue.name',
-  options: {},
+  options: {
+    durable: true,
+  },
 };
 
-broker.consume({ queue })
-  .then(({ ack, reject, message }) => /* handle success */)
-  .catch(error => /* handle error */);
+const routingKey = 'routing.key.name';
+
+broker.consume({ queue, routingKey }, (message) => {
+  // do something
+  // throw an error to reject message
+});
 ```
 
 ### broker.publish
 
-`broker.publish` expects to receive queue name, message and [broker options](#broker). Example:
+`broker.publish` expects to receive routing key, message and [publish options](https://www.squaremobius.net/amqp.node/channel_api.html#channel_publish). Example:
+
+```javascript
+const options = {
+  persistent: true,
+  exchange: {
+    name: 'exchange.name',
+  },
+};
+
+broker.publish('routing.key', { message: 'message' }, options)
+  .then(message => /* handle success */)
+  .catch(error => /* handle error */);
+```
+
+### broker.sendToQueue
+
+`broker.sendToQueue` expects to receive queue name, message and [publish options](https://www.squaremobius.net/amqp.node/channel_api.html#channel_publish). Example:
 
 ```javascript
 const queue = {
   options: {},
 };
 
-broker.publish('queue.name', { message: 'message' }, { queue })
-  .then(({ queue, message }) => /* handle success */)
+broker.sendToQueue('queue.name', { message: 'message' }, { queue })
+  .then(message => /* handle success */)
   .catch(error => /* handle error */);
 ```

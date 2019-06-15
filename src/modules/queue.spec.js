@@ -18,9 +18,6 @@ describe('modules/queue', () => {
 
       channel = {
         sendToQueue: jest.fn(),
-        connection: {
-          close: jest.fn(),
-        },
       };
     });
 
@@ -32,31 +29,21 @@ describe('modules/queue', () => {
 
     describe('when message was sent to queue', () => {
       let sentMessage;
-      let queue;
 
       beforeEach((done) => {
         channel.sendToQueue = (queueName, message, sendOptions, callback) => callback();
 
         jest.spyOn(helpers, 'log').mockImplementation(() => {});
 
-        sendToQueue(options, channel).then((data) => {
-          ({ queue } = data);
-          sentMessage = data.message;
+        sendToQueue(options, channel).then((message) => {
+          sentMessage = message;
 
           done();
         });
       });
 
-      test('close channel connection', () => {
-        expect(channel.connection.close).toHaveBeenCalled();
-      });
-
       test('log that the message was published', () => {
         expect(helpers.log).toHaveBeenCalledWith('info', 'message is published', options);
-      });
-
-      test('return the queue name', () => {
-        expect(queue).toEqual('queue.name');
       });
 
       test('return the message', () => {
@@ -75,10 +62,6 @@ describe('modules/queue', () => {
 
           done();
         });
-      });
-
-      test('close channel connection', () => {
-        expect(channel.connection.close).toHaveBeenCalled();
       });
 
       test('log that the message was not published', () => {
