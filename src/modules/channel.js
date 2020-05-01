@@ -5,11 +5,11 @@ const Module = {};
 Module.consume = (options, channel, callback) => {
   const { queue } = options;
 
-  return channel.consume(queue.name, (receivedMessage) => {
+  return channel.consume(queue.name, async (receivedMessage) => {
     try {
       const message = helpers.bufferToJson(receivedMessage.content);
 
-      callback(message);
+      await Promise.resolve(callback(message));
 
       channel.ack(receivedMessage);
 

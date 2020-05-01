@@ -38,29 +38,49 @@ describe('modules/channel', () => {
         channel.consume = (queueName, callback) => callback(receivedMessage);
 
         jest.spyOn(helpers, 'log').mockImplementation(() => {});
-
-        consumerCallback = jest.fn();
-
-        consume(options, channel, consumerCallback);
       });
 
-      test('log that the message was consumed', () => {
-        expect(helpers.log).toHaveBeenCalledWith('info', 'message was consumed', {
-          queue: {
-            name: 'queue.name',
-          },
-          message: {
-            message: 'message',
-          },
+      describe('and the callback is performed', () => {
+        beforeEach(() => {
+          consumerCallback = jest.fn();
+
+          consume(options, channel, consumerCallback);
+        });
+
+        test('log that the message was consumed', () => {
+          expect(helpers.log).toHaveBeenCalledWith('info', 'message was consumed', {
+            queue: {
+              name: 'queue.name',
+            },
+            message: {
+              message: 'message',
+            },
+          });
+        });
+
+        test('return the parsed message', () => {
+          expect(consumerCallback).toHaveBeenCalledWith({ message: 'message' });
+        });
+
+        test('call channel.ack with received message when ack is called', () => {
+          expect(channel.ack).toHaveBeenCalledWith(receivedMessage);
         });
       });
 
-      test('return the parsed message', () => {
-        expect(consumerCallback).toHaveBeenCalledWith({ message: 'message' });
-      });
+      describe('and the callback is not performed', () => {
+        beforeEach(() => {
+          consumerCallback = jest.fn().mockImplementation(() => Promise.reject(new Error('message error')));
 
-      test('call channel.ack with received message when ack is called', () => {
-        expect(channel.ack).toHaveBeenCalledWith(receivedMessage);
+          consume(options, channel, consumerCallback);
+        });
+
+        test('log that the message was not consumed', () => {
+          expect(helpers.log).toHaveBeenCalledWith('error', 'message error', options);
+        });
+
+        test('call channel.reject with received message', () => {
+          expect(channel.reject).toHaveBeenCalledWith(receivedMessage);
+        });
       });
     });
 
